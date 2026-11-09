@@ -45,13 +45,18 @@ window.addEventListener('popstate', () => activate(location.hash.slice(1)));
 window.addEventListener('hashchange', () => activate(location.hash.slice(1)));
 activate(location.hash.slice(1));
 
-// Only use authentic user-supplied bytes; no remote or substitute image.
-const suppliedPortrait = Object.keys(import.meta.glob('/public/assets/*')).find(path => /\/(liza-profile\.jpeg|IMG_8662\.jpeg)$/.test(path));
-if (suppliedPortrait) {
-  const portrait = document.getElementById('liza-portrait');
+// This file is supplied in public/assets and copied to /assets by Vite.
+// Bind it directly; globbing /public paths doesn't produce a usable browser URL.
+const portrait = document.getElementById('liza-portrait');
+const portraitPending = document.getElementById('portrait-pending');
+if (portrait && portraitPending) {
   portrait.addEventListener('load', () => {
     portrait.hidden = false;
-    document.getElementById('portrait-pending').hidden = true;
+    portraitPending.hidden = true;
   });
-  portrait.src = suppliedPortrait.replace('/public', '');
+  portrait.addEventListener('error', () => {
+    portrait.hidden = true;
+    portraitPending.hidden = false;
+  });
+  portrait.src = '/assets/liza-profile.jpg';
 }
